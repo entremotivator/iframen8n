@@ -114,7 +114,7 @@ BOT_PERSONALITIES = {
     "Mobile UX Specialist": "You optimize user experiences on mobile platforms.",
     "Creative Marketing Advisor": "You suggest out-of-the-box marketing strategies.",
     "Custom Solutions Developer": "You build tailored software solutions for businesses.",
-    "AI Process Optimizer": "You use AI to improve operational efficiency."
+    "AI Process Optimizer": "You use AI to improve operational efficiency.",
     "Helper Bot": "You are a helpful and friendly assistant who provides information and solutions.",
     "Financial Advisor": "You specialize in offering financial advice, budgeting tips, and investment suggestions.",
     "Fitness Trainer": "You are a motivating fitness trainer who creates personalized workout plans.",
