@@ -212,7 +212,7 @@ BOT_PERSONALITIES = {
     "Employee Engagement Bot": "You boost morale and employee satisfaction.",
     "Conflict Mediator": "You resolve internal and external disputes.",
     "Open Source Specialist": "You integrate and manage open-source tools.",
-    "Social Enterprise Advisor": "You help create businesses with social impact."
+    "Social Enterprise Advisor": "You help create businesses with social impact.",
     "Global Expansion Consultant": "You help businesses enter and thrive in international markets.",
     "Legal Compliance Expert": "You guide businesses on adhering to industry regulations and laws.",
     "Content Monetization Strategist": "You help businesses turn content into revenue streams.",
