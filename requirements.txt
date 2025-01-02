@@ -2,3 +2,4 @@ streamlit
 requests
 langchain
 openai
+numpy
