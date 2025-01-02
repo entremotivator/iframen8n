@@ -1,38 +1,82 @@
 import streamlit as st
 import requests
+from typing import List, Dict
+import json
 
-# Streamlit App Title
-st.title("Ollama API Query Interface")
+# Initialize session state for chat history if it doesn't exist
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-# Instructions
-st.markdown("### Interact with the Ollama API via this interface. Enter your query below:")
+def send_message_to_ollama(message: str) -> str:
+    """Send a message to Ollama API and return the response."""
+    try:
+        response = requests.post(
+            "https://theaisource-u29564.vm.elestio.app:57987/query",
+            auth=("root", "eZfLK3X4-SX0i-UmgUBe6E"),
+            json={"prompt": message},
+            timeout=30
+        )
+        response.raise_for_status()
+        return response.json().get('response', 'No response received')
+    except requests.exceptions.RequestException as e:
+        st.error(f"API Error: {str(e)}")
+        return f"Error: {str(e)}"
 
-# User Input
-query = st.text_area("Enter your query:", placeholder="Type something to query Ollama...")
+def main():
+    st.set_page_config(
+        page_title="Ollama Chat",
+        page_icon="🤖",
+        layout="wide"
+    )
 
-# Submit Button
-if st.button("Submit"):
-    if query.strip():
-        # Send Query to Ollama API
-        try:
-            response = requests.post(
-                "https://theaisource-u29564.vm.elestio.app:57987/query",
-                auth=("root", "eZfLK3X4-SX0i-UmgUBe6E"),
-                json={"prompt": query},
-            )
-            if response.status_code == 200:
-                # Display API Response
-                result = response.json()
-                st.success("Query Successful!")
-                st.write("**Response:**")
-                st.json(result)
-            else:
-                st.error(f"API Error: {response.status_code} - {response.text}")
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
-    else:
-        st.warning("Please enter a query before submitting.")
+    st.title("🤖 Ollama Chat Interface")
+    
+    # Sidebar with information
+    with st.sidebar:
+        st.markdown("### About")
+        st.markdown("""
+        This is a chat interface for Ollama AI.
+        - Type your message in the input box
+        - Press Enter or click Send to chat
+        - Chat history is maintained during the session
+        """)
+        
+        if st.button("Clear Chat History"):
+            st.session_state.messages = []
+            st.rerun()
 
-# Footer Information
-st.markdown("---")
-st.markdown("🔒 **Note:** API credentials are securely used within this app and not exposed.")
+    # Display chat messages
+    chat_container = st.container()
+    with chat_container:
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+
+    # Chat input
+    if prompt := st.chat_input("What would you like to discuss?"):
+        # Add user message to chat history
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        
+        # Display user message
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        # Get bot response
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                response = send_message_to_ollama(prompt)
+                st.markdown(response)
+                
+        # Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": response})
+
+    # Footer
+    st.markdown("---")
+    st.markdown("""
+    <div style='text-align: center'>
+        <p>🔒 Secure API Connection • Built with Streamlit</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    main()
