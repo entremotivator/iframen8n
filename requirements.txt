@@ -5,6 +5,7 @@ openai
 numpy
 Pillow
 PyPDF2
+cv2
 plotly
 opencv-python
 pytesseract
