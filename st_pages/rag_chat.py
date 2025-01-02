@@ -121,98 +121,95 @@ class RAGChat:
         
         return windows
 
-    def process_pdfs(self, pdf_files, embedding_model="bge-small"):
-        try:
-            all_windows = []
-            
-            with tempfile.TemporaryDirectory() as temp_dir:
-                for pdf_file in pdf_files:
-                    temp_path = os.path.join(temp_dir, pdf_file.name)
-                    with open(temp_path, "wb") as f:
-                        f.write(pdf_file.getbuffer())
-                    
-                    loader = PyPDFLoader(temp_path)
-                    documents = loader.load()
-                    
-                    all_windows = [Document(page_content=window) 
-                                   for doc in documents 
-                                   for window in self._create_sentence_windows(text=doc.page_content, 
-                                                                               window_size=4)]
-            
-            # Relevant: Detect GPU availability
-            device = "cuda" if torch.cuda.is_available() else "cpu"
+    DEFAULT_API_URL = "https://theaisource-u29564.vm.elestio.app:57987"
+DEFAULT_USERNAME = "root"
+DEFAULT_PASSWORD = "eZfLK3X4-SX0i-UmgUBe6E"
 
-            # Choose embedding type based on model configuration
-            model_config = self.EMBEDDING_MODELS[embedding_model]
-            if model_config["type"] == "ollama":
-                embeddings = OllamaEmbeddings(
-                    model=model_config["name"],
-                    base_url="http://localhost:11434"
-                )
-            else:  # huggingface
-                embeddings = HuggingFaceEmbeddings(
-                    model_name=model_config["name"],
-                    model_kwargs={'device': device},
-                    encode_kwargs={'normalize_embeddings': True}
-                )
-            
-            self.vectorstore = FAISS.from_documents(documents=all_windows, embedding=embeddings)
-            return len(all_windows)
-            
-        except Exception as e:
-            logging.error(f"Error processing PDFs: {str(e)}")
-            raise
+def process_pdfs(self, pdf_files, embedding_model="bge-small"):
+    try:
+        all_windows = []
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            for pdf_file in pdf_files:
+                temp_path = os.path.join(temp_dir, pdf_file.name)
+                with open(temp_path, "wb") as f:
+                    f.write(pdf_file.getbuffer())
+                
+                loader = PyPDFLoader(temp_path)
+                documents = loader.load()
+                
+                all_windows = [Document(page_content=window) 
+                               for doc in documents 
+                               for window in self._create_sentence_windows(text=doc.page_content, 
+                                                                           window_size=4)]
+        
+        # Relevant: Detect GPU availability
+        device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    def get_retrieval_chain(self, ollama_model: str, stream_handler=None):
-        # Set up Ollama LLM
-        #llm = ChatOllama(
-        #    model=model_name,
-        #    temperature=0.2,
-        #    base_url="http://localhost:11434",
-            #format="json"  # Updated to use simple string format
-        #)
+        # Choose embedding type based on model configuration
+        model_config = self.EMBEDDING_MODELS[embedding_model]
+        if model_config["type"] == "ollama":
+            embeddings = OllamaEmbeddings(
+                model=model_config["name"],
+                base_url=DEFAULT_API_URL  # Use cloud base URL
+            )
+        else:  # huggingface
+            embeddings = HuggingFaceEmbeddings(
+                model_name=model_config["name"],
+                model_kwargs={'device': device},
+                encode_kwargs={'normalize_embeddings': True}
+            )
+        
+        self.vectorstore = FAISS.from_documents(documents=all_windows, embedding=embeddings)
+        return len(all_windows)
+        
+    except Exception as e:
+        logging.error(f"Error processing PDFs: {str(e)}")
+        raise
 
-        # Set up Ollama LLM
-        llm = Ollama(
-            model=ollama_model,
-            temperature=0.2,
-            base_url="http://localhost:11434",
-            callbacks=[stream_handler] if stream_handler else None
-            #system_prompt="You are a helpful AI assistant. Keep your answers brief and concise."
-        )
-        
-        template = """
-        Context: {context}
-        Question: {question}
-        
-        Provide a detailed, well-structured answer based only on the above context.
-        """
-        
-        prompt = PromptTemplate(
-            template=template,
-            input_variables=["context", "question"]
-        )
-        
-        return RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=self.vectorstore.as_retriever(search_kwargs={"k": 7,
-                                                                   "fetch_k": 20}),
-            return_source_documents=True,
-            chain_type_kwargs={"prompt": prompt}
-        )
+def get_retrieval_chain(self, ollama_model: str, stream_handler=None):
+    # Set up Ollama LLM
+    llm = Ollama(
+        model=ollama_model,
+        temperature=0.2,
+        base_url=DEFAULT_API_URL,  # Use cloud base URL
+        callbacks=[stream_handler] if stream_handler else None
+        #system_prompt="You are a helpful AI assistant. Keep your answers brief and concise."
+    )
+    
+    template = """
+    Context: {context}
+    Question: {question}
+    
+    Provide a detailed, well-structured answer based only on the above context.
+    """
+    
+    prompt = PromptTemplate(
+        template=template,
+        input_variables=["context", "question"]
+    )
+    
+    return RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=self.vectorstore.as_retriever(search_kwargs={"k": 7, "fetch_k": 20}),
+        return_source_documents=True,
+        chain_type_kwargs={"prompt": prompt}
+    )
 
 def get_ollama_models() -> list:
     try:
-        response = requests.get("http://localhost:11434/api/tags")
+        response = requests.get(f"{DEFAULT_API_URL}/api/tags")  # Use cloud base URL
         if response.status_code == 200:
             models = response.json()
             return [model['name'] for model in models['models']
                     if all(keyword not in model['name'].lower()
                         for keyword in ('failed', 'embed', 'bge'))]
         return []
-    except:
+    except Exception as e:
+        logging.error(f"Error fetching models: {str(e)}")
         return []
+
 
 def init_session_state():
     """Initialize all session state variables."""
