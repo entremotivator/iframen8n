@@ -12,6 +12,11 @@ DEFAULT_API_URL = "https://theaisource-u29564.vm.elestio.app:57987"
 DEFAULT_USERNAME = "root"
 DEFAULT_PASSWORD = "eZfLK3X4-SX0i-UmgUBe6E"
 
+def run():
+    st.title("Media Page")
+    st.write("Welcome to the Media page!")
+    st.write("Here you can manage media-related tasks and information.")
+
 # Social Media Post Types and Platform-Specific Requirements
 POST_TYPES = {
     "product_launch": {
