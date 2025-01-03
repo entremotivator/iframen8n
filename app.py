@@ -1,12 +1,8 @@
 import streamlit as st
-import st_pages  # Ensure this module is correctly installed and imported
+import st_pages  # Required module for handling pages
 
 # Set page config
-st.set_page_config(
-    page_title="TalkNexus - Ollama Chatbot Multi-Model Interface",
-    layout="wide",
-    page_icon="🤖"
-)
+st.set_page_config(page_title="TalkNexus - Ollama Chatbot Multi-Model Interface", layout="wide", page_icon="🤖")
 
 # Load custom CSS from file
 def load_css(file_name):
@@ -30,49 +26,49 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Enhanced pages definition with additional pages
+# Enhanced pages definition
 PAGES = {
     "Home": {
         "icon": "house-door",
-        "func": lambda: st.write("Welcome to TalkNexus! Explore the AI-powered chatbot interface."),
+        "func": st_pages.home,
         "description": "Guidelines & Overview",
         "badge": "Informative",
         "color": "var(--primary-color)"
     },
     "Language Models Management": {
         "icon": "gear",
-        "func": lambda: st.write("Manage and download AI language models."),
+        "func": st_pages.model_management,
         "description": "Download Models",
         "badge": "Configurations",
         "color": "var(--secondary-color)"
     },
     "AI Conversation": {
         "icon": "chat-dots",
-        "func": lambda: st.write("Start interactive AI conversations here."),
+        "func": st_pages.ai_chatbot,
         "description": "Interactive AI Chat",
         "badge": "Application",
         "color": "var(--highlight-color)"
     },
     "RAG Conversation": {
         "icon": "chat-dots",
-        "func": lambda: st.write("Chat with AI powered by RAG models."),
+        "func": st_pages.rag_chat,
         "description": "PDF AI Chat Assistant",
         "badge": "Application",
         "color": "var(--highlight-color)"
     },
-    "Analytics Dashboard": {
-        "icon": "bar-chart-line",
-        "func": lambda: st.write("View analytics of AI conversations and performance."),
-        "description": "View AI Conversation Analytics",
-        "badge": "Insights",
-        "color": "var(--tertiary-color)"
+    "Media": {
+        "icon": "image",
+        "func": st_pages.media,
+        "description": "Media Management",
+        "badge": "Media",
+        "color": "var(--info-color)"
     },
-    "Settings": {
-        "icon": "sliders",
-        "func": lambda: st.write("Configure user preferences and app settings."),
-        "description": "User Preferences & Configuration",
-        "badge": "Customizable",
-        "color": "var(--accent-color)"
+    "Credit": {
+        "icon": "credit-card",
+        "func": st_pages.credit,
+        "description": "Credit Management",
+        "badge": "Finance",
+        "color": "var(--success-color)"
     }
 }
 
@@ -80,7 +76,6 @@ st.markdown("""
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 """, unsafe_allow_html=True)
 
-# Navigation function
 def navigate():
     with st.sidebar:
         st.markdown('''
@@ -101,8 +96,7 @@ def navigate():
         # Create menu items
         for page, info in PAGES.items():
             selected = st.session_state.current_page == page
-
-            # Create the button
+            
             if st.button(
                 f"{page}",
                 key=f"nav_{page}",
@@ -112,7 +106,6 @@ def navigate():
                 st.session_state.current_page = page
                 st.rerun()
 
-            # Visual menu item
             st.markdown(f"""
                 <div class="menu-item {'selected' if selected else ''}">
                     <div class="menu-icon">
@@ -126,7 +119,6 @@ def navigate():
                 </div>
             """, unsafe_allow_html=True)
 
-        # Close navigation container
         st.markdown('</div>', unsafe_allow_html=True)
         
         return st.session_state.current_page
@@ -144,7 +136,7 @@ try:
     page_function()
 except Exception as e:
     st.error(f"Error loading page: {str(e)}")
-    PAGES["Home"]["func"]()
+    st_pages.home()
 
 # Display the footer
 st.markdown("""
@@ -152,7 +144,8 @@ st.markdown("""
     <div class="footer-content">
         <p>© 2024 Powered by <a href="https://github.com/TsLu1s" target="_blank">TsLu1s</a>. 
         Advanced Language Models & Intelligent Conversations
-        | Project Source: <a href="https://github.com/TsLu1s/talknexus" target="_blank">TalkNexus</p>
+        | Project Source: <a href="https://github.com/TsLu1s/talknexus" target="_blank">TalkNexus</a></p>
     </div>
 </div>
 """, unsafe_allow_html=True)
+
