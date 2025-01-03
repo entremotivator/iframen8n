@@ -1,18 +1,5 @@
 import streamlit as st
-import st_pages  # required modules
-
-# Ollama cloud configuration
-DEFAULT_API_URL = "https://theaisource-u29564.vm.elestio.app:57987"
-DEFAULT_USERNAME = "root"
-DEFAULT_PASSWORD = "eZfLK3X4-SX0i-UmgUBe6E"
-
-def get_ollama_config():
-    """Returns Ollama cloud configuration."""
-    return {
-        "api_url": DEFAULT_API_URL,
-        "username": DEFAULT_USERNAME,
-        "password": DEFAULT_PASSWORD,
-    }
+import st_pages # required modules
 
 # Set page config
 st.set_page_config(page_title="TalkNexus - Ollama Chatbot Multi-Model Interface", layout="wide", page_icon="🤖")
@@ -46,29 +33,29 @@ PAGES = {
         "func": st_pages.home,
         "description": "Guidelines & Overview",
         "badge": "Informative",
-        "color": "var(--primary-color)",
+        "color": "var(--primary-color)"
     },
     "Language Models Management": {
         "icon": "gear",
         "func": st_pages.model_management,
         "description": "Download Models",
         "badge": "Configurations",
-        "color": "var(--secondary-color)",
+        "color": "var(--secondary-color)"
     },
     "AI Conversation": {
         "icon": "chat-dots",
         "func": st_pages.ai_chatbot,
         "description": "Interactive AI Chat",
         "badge": "Application",
-        "color": "var(--highlight-color)",
+        "color": "var(--highlight-color)"
     },
     "RAG Conversation": {
         "icon": "chat-dots",
         "func": st_pages.rag_chat,
         "description": "PDF AI Chat Assistant",
         "badge": "Application",
-        "color": "var(--highlight-color)",
-    },
+        "color": "var(--highlight-color)"
+    }
 }
 
 st.markdown("""
@@ -133,9 +120,9 @@ try:
         st.session_state.current_page = selected_page
         st.rerun()
     
-    # Pass Ollama config to the selected page
+    # Run the selected function
     page_function = PAGES[selected_page]["func"]
-    page_function(ollama_config=get_ollama_config())  # Pass config here
+    page_function()
 except Exception as e:
     st.error(f"Error loading page: {str(e)}")
     st_pages.home.run()
