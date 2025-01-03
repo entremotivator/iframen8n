@@ -1,13 +1,13 @@
 import streamlit as st
 import requests
+from langchain_community.embeddings import HuggingFaceEmbeddings, OllamaEmbeddings
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.vectorstores import FAISS
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.prompts import PromptTemplate
 from langchain_community.llms import Ollama
 from langchain.schema import Document
 from langchain.chains import RetrievalQA
-from langchain.embeddings import HuggingFaceEmbeddings, OllamaEmbeddings
-from langchain.document_loaders import PyPDFLoader
-from langchain.vectorstores import FAISS
 import nltk
 from nltk.tokenize import sent_tokenize
 import os
