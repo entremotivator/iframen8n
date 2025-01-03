@@ -1,5 +1,5 @@
-import streamlit as st
-import st_pages  # Required module for handling pages
+add to more pages import streamlit as st
+import st_pages # required modules
 
 # Set page config
 st.set_page_config(page_title="TalkNexus - Ollama Chatbot Multi-Model Interface", layout="wide", page_icon="🤖")
@@ -55,20 +55,6 @@ PAGES = {
         "description": "PDF AI Chat Assistant",
         "badge": "Application",
         "color": "var(--highlight-color)"
-    },
-    "Media": {
-        "icon": "image",
-        "func": st_pages.media,
-        "description": "Media Management",
-        "badge": "Media",
-        "color": "var(--info-color)"
-    },
-    "Credit": {
-        "icon": "credit-card",
-        "func": st_pages.credit,
-        "description": "Credit Management",
-        "badge": "Finance",
-        "color": "var(--success-color)"
     }
 }
 
@@ -97,6 +83,7 @@ def navigate():
         for page, info in PAGES.items():
             selected = st.session_state.current_page == page
             
+            # Create the button (invisible but clickable)
             if st.button(
                 f"{page}",
                 key=f"nav_{page}",
@@ -106,6 +93,7 @@ def navigate():
                 st.session_state.current_page = page
                 st.rerun()
 
+            # Visual menu item
             st.markdown(f"""
                 <div class="menu-item {'selected' if selected else ''}">
                     <div class="menu-icon">
@@ -119,6 +107,7 @@ def navigate():
                 </div>
             """, unsafe_allow_html=True)
 
+        # Close navigation container
         st.markdown('</div>', unsafe_allow_html=True)
         
         return st.session_state.current_page
@@ -136,16 +125,15 @@ try:
     page_function()
 except Exception as e:
     st.error(f"Error loading page: {str(e)}")
-    st_pages.home()
+    st_pages.home.run()
 
 # Display the footer
 st.markdown("""
 <div class="footer">
     <div class="footer-content">
-        <p>© 2024 Powered by <a href="https://github.com/TsLu1s" target="_blank">TsLu1s</a>. 
+        <p>© 2024 Powered by <a href="https://github.com/TsLu1s" target="_blank">TsLu1s </a>. 
         Advanced Language Models & Intelligent Conversations
-        | Project Source: <a href="https://github.com/TsLu1s/talknexus" target="_blank">TalkNexus</a></p>
+        | Project Source: <a href="https://github.com/TsLu1s/talknexus" target="_blank"> TalkNexus</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
-
