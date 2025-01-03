@@ -55,6 +55,20 @@ PAGES = {
         "description": "PDF AI Chat Assistant",
         "badge": "Application",
         "color": "var(--highlight-color)"
+    },
+    "Analytics Dashboard": {
+        "icon": "bar-chart-line",
+        "func": st_pages.analytics_dashboard,
+        "description": "View AI Conversation Analytics",
+        "badge": "Insights",
+        "color": "var(--tertiary-color)"
+    },
+    "Settings": {
+        "icon": "sliders",
+        "func": st_pages.settings,
+        "description": "User Preferences & Configuration",
+        "badge": "Customizable",
+        "color": "var(--accent-color)"
     }
 }
 
