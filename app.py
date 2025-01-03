@@ -1,4 +1,4 @@
-import streamlit as st
+iimport streamlit as st
 import st_pages # required modules
 
 # Set page config
@@ -49,16 +49,9 @@ PAGES = {
         "badge": "Application",
         "color": "var(--highlight-color)"
     },
-    "AI Conversation": {
-        "icon": "chat-dots",
-        "func": st_pages.media,
-        "description": "Interactive AI Chat",
-        "badge": "Application",
-        "color": "var(--highlight-color)"
-    },
     "RAG Conversation": {
         "icon": "chat-dots",
-        "func": st_pages.credit,
+        "func": st_pages.rag_chat,
         "description": "PDF AI Chat Assistant",
         "badge": "Application",
         "color": "var(--highlight-color)"
