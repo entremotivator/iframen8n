@@ -2,7 +2,6 @@ import streamlit as st
 import requests
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.prompts import PromptTemplate
-#from langchain_ollama import ChatOllama
 from langchain_community.llms import Ollama
 from langchain.schema import Document
 from langchain.chains import RetrievalQA
@@ -16,32 +15,35 @@ import tempfile
 import os
 import logging
 
+# Cloud API Configuration
+DEFAULT_API_URL = "https://theaisource-u29564.vm.elestio.app:57987"
+DEFAULT_USERNAME = "root"
+DEFAULT_PASSWORD = "eZfLK3X4-SX0i-UmgUBe6E"
+
+# Configure basic logging
+logging.basicConfig(level=logging.INFO)
+
+# Suppress warnings
 import warnings
 warnings.filterwarnings("ignore", category=Warning)
 
 # Download NLTK data at startup
 try:
-    nltk.download('punkt_tab', quiet=True)
+    nltk.download('punkt', quiet=True)
 except Exception as e:
     logging.warning(f"Failed to download NLTK punkt: {e}")
 
 class StreamHandler(BaseCallbackHandler):
-    """
-    Custom callback handler for streaming LLM responses token by token.
-    """
     def __init__(self, container):
         self.container = container
         self.text = ""
         
     def on_llm_new_token(self, token: str, **kwargs):
-        """
-        Processes each new token from the LLM response stream.
-        """
         try:
             self.text += token
             clean_text = self.text
             
-            # Clean up any AIMessage formatting if present
+            # Clean up any AIMessage formatting
             if "AIMessage" in clean_text:
                 if "content=\"" in clean_text:
                     try:
@@ -53,14 +55,12 @@ class StreamHandler(BaseCallbackHandler):
                                       .replace(", additional_kwargs={}", "")
                                       .replace(", response_metadata={})", "")
                                       .replace('{ "data":' , "")
-                                      .replace('}' , "")
-                )
+                                      .replace('}' , ""))
             
-            # Update the display with cleaned text
             self.container.markdown(clean_text)
             
         except Exception as e:
-            print(f"Warning in StreamHandler: {str(e)}")
+            logging.warning(f"StreamHandler error: {str(e)}")
             self.container.markdown(self.text)
 
 class RAGChat:
@@ -93,23 +93,17 @@ class RAGChat:
         "snowflake-arctic-embed2:568m": {
             "name": "snowflake-arctic-embed2:568m",
             "type": "ollama",
-            "description": "Multilingual frontier model with strong performance [Ollama Embedding Model, Download it first]"
+            "description": "Multilingual frontier model with strong performance [Ollama Embedding Model]"
         }
     }
 
     def __init__(self):
         self.vectorstore = None
+        self.headers = {
+            "Authorization": f"Basic {DEFAULT_USERNAME}:{DEFAULT_PASSWORD}"
+        }
     
-    @staticmethod
-    def _create_sentence_windows(text, window_size):
-        """Creates overlapping sentence windows from input text.
-        
-        Args:
-            text (str): Input text to be windowed
-            
-        Returns:
-            list[str]: List of text windows, each containing 2*window_size+1 sentences
-        """
+    def _create_sentence_windows(self, text, window_size=4):
         sentences = sent_tokenize(text)
         windows = []
         
@@ -121,85 +115,82 @@ class RAGChat:
         
         return windows
 
-DEFAULT_API_URL = "https://theaisource-u29564.vm.elestio.app:57987"
-DEFAULT_USERNAME = "root"
-DEFAULT_PASSWORD = "eZfLK3X4-SX0i-UmgUBe6E"
+    def process_pdfs(self, pdf_files, embedding_model="bge-small"):
+        try:
+            all_windows = []
+            
+            with tempfile.TemporaryDirectory() as temp_dir:
+                for pdf_file in pdf_files:
+                    temp_path = os.path.join(temp_dir, pdf_file.name)
+                    with open(temp_path, "wb") as f:
+                        f.write(pdf_file.getbuffer())
+                    
+                    loader = PyPDFLoader(temp_path)
+                    documents = loader.load()
+                    
+                    for doc in documents:
+                        windows = self._create_sentence_windows(doc.page_content)
+                        all_windows.extend([Document(page_content=window) for window in windows])
+            
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            
+            model_config = self.EMBEDDING_MODELS[embedding_model]
+            if model_config["type"] == "ollama":
+                embeddings = OllamaEmbeddings(
+                    model=model_config["name"],
+                    base_url=DEFAULT_API_URL,
+                    headers=self.headers
+                )
+            else:
+                embeddings = HuggingFaceEmbeddings(
+                    model_name=model_config["name"],
+                    model_kwargs={'device': device},
+                    encode_kwargs={'normalize_embeddings': True}
+                )
+            
+            self.vectorstore = FAISS.from_documents(documents=all_windows, embedding=embeddings)
+            return len(all_windows)
+            
+        except Exception as e:
+            logging.error(f"PDF processing error: {str(e)}")
+            raise
 
-def process_pdfs(self, pdf_files, embedding_model="bge-small"):
-    try:
-        all_windows = []
+    def get_retrieval_chain(self, ollama_model: str, stream_handler=None):
+        llm = Ollama(
+            model=ollama_model,
+            temperature=0.2,
+            base_url=DEFAULT_API_URL,
+            headers=self.headers,
+            callbacks=[stream_handler] if stream_handler else None
+        )
         
-        with tempfile.TemporaryDirectory() as temp_dir:
-            for pdf_file in pdf_files:
-                temp_path = os.path.join(temp_dir, pdf_file.name)
-                with open(temp_path, "wb") as f:
-                    f.write(pdf_file.getbuffer())
-                
-                loader = PyPDFLoader(temp_path)
-                documents = loader.load()
-                
-                all_windows = [Document(page_content=window) 
-                               for doc in documents 
-                               for window in self._create_sentence_windows(text=doc.page_content, 
-                                                                           window_size=4)]
+        template = """
+        Context: {context}
+        Question: {question}
         
-        # Relevant: Detect GPU availability
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-
-        # Choose embedding type based on model configuration
-        model_config = self.EMBEDDING_MODELS[embedding_model]
-        if model_config["type"] == "ollama":
-            embeddings = OllamaEmbeddings(
-                model=model_config["name"],
-                base_url=DEFAULT_API_URL  # Use cloud base URL
-            )
-        else:  # huggingface
-            embeddings = HuggingFaceEmbeddings(
-                model_name=model_config["name"],
-                model_kwargs={'device': device},
-                encode_kwargs={'normalize_embeddings': True}
-            )
+        Provide a detailed, well-structured answer based only on the above context.
+        """
         
-        self.vectorstore = FAISS.from_documents(documents=all_windows, embedding=embeddings)
-        return len(all_windows)
+        prompt = PromptTemplate(
+            template=template,
+            input_variables=["context", "question"]
+        )
         
-    except Exception as e:
-        logging.error(f"Error processing PDFs: {str(e)}")
-        raise
-
-def get_retrieval_chain(self, ollama_model: str, stream_handler=None):
-    # Set up Ollama LLM
-    llm = Ollama(
-        model=ollama_model,
-        temperature=0.2,
-        base_url=DEFAULT_API_URL,  # Use cloud base URL
-        callbacks=[stream_handler] if stream_handler else None
-        #system_prompt="You are a helpful AI assistant. Keep your answers brief and concise."
-    )
-    
-    template = """
-    Context: {context}
-    Question: {question}
-    
-    Provide a detailed, well-structured answer based only on the above context.
-    """
-    
-    prompt = PromptTemplate(
-        template=template,
-        input_variables=["context", "question"]
-    )
-    
-    return RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=self.vectorstore.as_retriever(search_kwargs={"k": 7, "fetch_k": 20}),
-        return_source_documents=True,
-        chain_type_kwargs={"prompt": prompt}
-    )
+        return RetrievalQA.from_chain_type(
+            llm=llm,
+            chain_type="stuff",
+            retriever=self.vectorstore.as_retriever(search_kwargs={"k": 7, "fetch_k": 20}),
+            return_source_documents=True,
+            chain_type_kwargs={"prompt": prompt}
+        )
 
 def get_ollama_models() -> list:
     try:
-        response = requests.get(f"{DEFAULT_API_URL}/api/tags")  # Use cloud base URL
+        headers = {
+            "Authorization": f"Basic {DEFAULT_USERNAME}:{DEFAULT_PASSWORD}"
+        }
+        response = requests.get(f"{DEFAULT_API_URL}/api/tags", headers=headers)
+        
         if response.status_code == 200:
             models = response.json()
             return [model['name'] for model in models['models']
@@ -210,9 +201,7 @@ def get_ollama_models() -> list:
         logging.error(f"Error fetching models: {str(e)}")
         return []
 
-
 def init_session_state():
-    """Initialize all session state variables."""
     if 'messages' not in st.session_state:
         st.session_state.messages = []
     if 'rag_chain' not in st.session_state:
@@ -225,7 +214,6 @@ def init_session_state():
         st.session_state.last_experiment_name = None
     if 'processed_files' not in st.session_state:
         st.session_state.processed_files = False
-    # Add new state variables to track changes
     if 'previous_model' not in st.session_state:
         st.session_state.previous_model = None
     if 'previous_embedding' not in st.session_state:
@@ -236,19 +224,16 @@ def init_session_state():
         st.session_state.process_ready = False
 
 def render_header():
-    """Render the application header."""
     st.markdown('''
     <div class="header-container">
-        <p class="header-subtitle">🔍 RAG - Powered PDF Chat Assistant</p>
+        <p class="header-subtitle">🔍 Cloud RAG - Powered PDF Chat Assistant</p>
     </div>
     ''', unsafe_allow_html=True)
 
 def setup_model_selection():
-    """Setup the embedding and LLM model selection interface."""
-    
     models = get_ollama_models()
     if not models:
-        st.warning(f"Ollama is not running. Make sure to have Ollama API installed (PC Restart may be Needed)")
+        st.warning("Cannot connect to Ollama Cloud API. Please check your connection and credentials.")
         return None, None, None
     
     col1, col2 = st.columns(2)
@@ -264,6 +249,7 @@ def setup_model_selection():
             models,
             format_func=lambda x: f'🔮 {x}'
         )
+    
     with col2:
         st.markdown("##### 📤 Upload Documents")
         uploaded_files = st.file_uploader(
@@ -276,16 +262,13 @@ def setup_model_selection():
         if uploaded_files:
             st.markdown(f"*{len(uploaded_files)} files selected*")
 
-    # Check for changes in model, embedding, or files
     if (st.session_state.previous_model != llm_model or 
         st.session_state.previous_embedding != embedding_model or 
         st.session_state.previous_files != uploaded_files):
-        # Reset the process_ready checkbox
         st.session_state.process_ready = False
         st.session_state.show_chat = False
         st.session_state.processing_completed = False
     
-    # Update previous states
     st.session_state.previous_model = llm_model
     st.session_state.previous_embedding = embedding_model
     st.session_state.previous_files = uploaded_files
@@ -293,18 +276,14 @@ def setup_model_selection():
     return uploaded_files, embedding_model, llm_model
 
 def process_documents(experiment_name, uploaded_files, embedding_model):
-    """Process uploaded documents if conditions are met."""
-    # First check if we have an experiment name
     if not experiment_name:
         st.error("Please enter an experiment name")
         return False
     
-    # Then check if we have uploaded files
     if not uploaded_files:
         st.error("Please upload PDF files first")
         return False
         
-    # If we have both, proceed with processing
     with st.spinner("📚 Processing documents..."):
         try:
             st.session_state.rag_system.process_pdfs(
@@ -321,20 +300,14 @@ def process_documents(experiment_name, uploaded_files, embedding_model):
             return False
 
 def handle_chat_interaction(llm_model):
-    """Handle chat interface and interactions."""
-    # Create chat input AFTER container to ensure proper rendering order
     chat_container = st.container()
-    
-    # Place chat input after history display
     prompt = st.chat_input("Ask about your documents")
 
     with chat_container:
-        # Display chat history
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
     
-        # Handle new prompt
         if prompt and st.session_state.rag_system.vectorstore:
             if st.session_state.rag_system.vectorstore:
                 process_chat_message(prompt, llm_model)
@@ -342,13 +315,10 @@ def handle_chat_interaction(llm_model):
                 st.warning("Please process documents first!")
 
 def process_chat_message(prompt, llm_model):
-    """Process a single chat message and generate response."""
-    # Add user message to state and display it
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    # Create assistant message
     with st.chat_message("assistant"):
         response_placeholder = st.empty()
         stream_handler = StreamHandler(response_placeholder)
@@ -364,14 +334,10 @@ def process_chat_message(prompt, llm_model):
             })
             
             final_response = response["result"].strip()
-            
-            # Update message history
             st.session_state.messages.append({
                 "role": "assistant",
                 "content": final_response
             })
-            
-            # Ensure final response is displayed
             response_placeholder.markdown(final_response)
             
         except Exception as e:
@@ -383,46 +349,40 @@ def process_chat_message(prompt, llm_model):
             })
 
 def run():
-    """Main application function."""
     init_session_state()   
     render_header()
     
     st.markdown("#### 📋 Configuration")
     
-    # Setup model selection & Handle file upload
     uploaded_files, embedding_model, llm_model = setup_model_selection()
-    if not llm_model:  # Ollama not running
+    if not llm_model:
         return
     
-    # Get experiment name
     experiment_name = st.text_input(
         "📝 Name your Experiment",
         key="experiment_name",
         placeholder="Enter experiment name",
     )
     
-    # Use checkbox with explicit state handling
     process_ready = st.checkbox("Start RAG Analysis", 
-                                key="process_ready", 
-                                value=st.session_state.process_ready)
+                              key="process_ready", 
+                              value=st.session_state.process_ready)
     
-    # Only attempt processing if checkbox is checked
     if process_ready:
-        # Store processing result
         if 'processing_completed' not in st.session_state:
             st.session_state.processing_completed = False
             
-        # Only process if not already completed
         if not st.session_state.processing_completed:
             st.session_state.processing_completed = process_documents(
                 experiment_name, uploaded_files, embedding_model
             )
     else:
-        # Reset processing state when checkbox is unchecked
         st.session_state.processing_completed = False
         st.session_state.show_chat = False
     
-    # Show chat interface
     if st.session_state.show_chat:
         handle_chat_interaction(llm_model)
+
+if __name__ == "__main__":
+    run()
 
