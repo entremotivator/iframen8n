@@ -1,4 +1,4 @@
- import streamlit as st
+import streamlit as st
 import st_pages # required modules
 
 # Set page config
