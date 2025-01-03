@@ -10,10 +10,10 @@ from langchain.document_loaders import PyPDFLoader
 from langchain.vectorstores import FAISS
 import nltk
 from nltk.tokenize import sent_tokenize
-import torch
-import tempfile
 import os
+import tempfile
 import logging
+from typing import List, Dict, Any
 
 # Cloud API Configuration
 DEFAULT_API_URL = "https://theaisource-u29564.vm.elestio.app:57987"
@@ -43,7 +43,6 @@ class StreamHandler(BaseCallbackHandler):
             self.text += token
             clean_text = self.text
             
-            # Clean up any AIMessage formatting
             if "AIMessage" in clean_text:
                 if "content=\"" in clean_text:
                     try:
@@ -103,7 +102,7 @@ class RAGChat:
             "Authorization": f"Basic {DEFAULT_USERNAME}:{DEFAULT_PASSWORD}"
         }
     
-    def _create_sentence_windows(self, text, window_size=4):
+    def _create_sentence_windows(self, text: str, window_size: int = 4) -> List[str]:
         sentences = sent_tokenize(text)
         windows = []
         
@@ -115,7 +114,7 @@ class RAGChat:
         
         return windows
 
-    def process_pdfs(self, pdf_files, embedding_model="bge-small"):
+    def process_pdfs(self, pdf_files, embedding_model: str = "bge-small") -> int:
         try:
             all_windows = []
             
@@ -132,8 +131,6 @@ class RAGChat:
                         windows = self._create_sentence_windows(doc.page_content)
                         all_windows.extend([Document(page_content=window) for window in windows])
             
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            
             model_config = self.EMBEDDING_MODELS[embedding_model]
             if model_config["type"] == "ollama":
                 embeddings = OllamaEmbeddings(
@@ -144,7 +141,6 @@ class RAGChat:
             else:
                 embeddings = HuggingFaceEmbeddings(
                     model_name=model_config["name"],
-                    model_kwargs={'device': device},
                     encode_kwargs={'normalize_embeddings': True}
                 )
             
@@ -184,7 +180,7 @@ class RAGChat:
             chain_type_kwargs={"prompt": prompt}
         )
 
-def get_ollama_models() -> list:
+def get_ollama_models() -> List[str]:
     try:
         headers = {
             "Authorization": f"Basic {DEFAULT_USERNAME}:{DEFAULT_PASSWORD}"
@@ -202,26 +198,22 @@ def get_ollama_models() -> list:
         return []
 
 def init_session_state():
-    if 'messages' not in st.session_state:
-        st.session_state.messages = []
-    if 'rag_chain' not in st.session_state:
-        st.session_state.rag_chain = None
-    if 'rag_system' not in st.session_state:
-        st.session_state.rag_system = RAGChat()
-    if 'show_chat' not in st.session_state:
-        st.session_state.show_chat = False
-    if 'last_experiment_name' not in st.session_state:
-        st.session_state.last_experiment_name = None
-    if 'processed_files' not in st.session_state:
-        st.session_state.processed_files = False
-    if 'previous_model' not in st.session_state:
-        st.session_state.previous_model = None
-    if 'previous_embedding' not in st.session_state:
-        st.session_state.previous_embedding = None
-    if 'previous_files' not in st.session_state:
-        st.session_state.previous_files = None
-    if 'process_ready' not in st.session_state:
-        st.session_state.process_ready = False
+    session_vars = {
+        'messages': [],
+        'rag_chain': None,
+        'rag_system': RAGChat(),
+        'show_chat': False,
+        'last_experiment_name': None,
+        'processed_files': False,
+        'previous_model': None,
+        'previous_embedding': None,
+        'previous_files': None,
+        'process_ready': False,
+    }
+    
+    for var, default in session_vars.items():
+        if var not in st.session_state:
+            st.session_state[var] = default
 
 def render_header():
     st.markdown('''
@@ -262,6 +254,7 @@ def setup_model_selection():
         if uploaded_files:
             st.markdown(f"*{len(uploaded_files)} files selected*")
 
+    # Check for changes in configuration
     if (st.session_state.previous_model != llm_model or 
         st.session_state.previous_embedding != embedding_model or 
         st.session_state.previous_files != uploaded_files):
@@ -269,13 +262,14 @@ def setup_model_selection():
         st.session_state.show_chat = False
         st.session_state.processing_completed = False
     
+    # Update previous states
     st.session_state.previous_model = llm_model
     st.session_state.previous_embedding = embedding_model
     st.session_state.previous_files = uploaded_files
 
     return uploaded_files, embedding_model, llm_model
 
-def process_documents(experiment_name, uploaded_files, embedding_model):
+def process_documents(experiment_name: str, uploaded_files: List[Any], embedding_model: str) -> bool:
     if not experiment_name:
         st.error("Please enter an experiment name")
         return False
@@ -299,7 +293,7 @@ def process_documents(experiment_name, uploaded_files, embedding_model):
             st.error(f"❌ Error processing documents: {str(e)}")
             return False
 
-def handle_chat_interaction(llm_model):
+def handle_chat_interaction(llm_model: str):
     chat_container = st.container()
     prompt = st.chat_input("Ask about your documents")
 
@@ -314,7 +308,7 @@ def handle_chat_interaction(llm_model):
             else:
                 st.warning("Please process documents first!")
 
-def process_chat_message(prompt, llm_model):
+def process_chat_message(prompt: str, llm_model: str):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -385,4 +379,3 @@ def run():
 
 if __name__ == "__main__":
     run()
-
