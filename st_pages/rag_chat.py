@@ -121,7 +121,7 @@ class RAGChat:
         
         return windows
 
-    DEFAULT_API_URL = "https://theaisource-u29564.vm.elestio.app:57987"
+DEFAULT_API_URL = "https://theaisource-u29564.vm.elestio.app:57987"
 DEFAULT_USERNAME = "root"
 DEFAULT_PASSWORD = "eZfLK3X4-SX0i-UmgUBe6E"
 
