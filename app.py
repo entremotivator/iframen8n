@@ -58,7 +58,7 @@ PAGES = {
     },
     "Analytics Dashboard": {
         "icon": "bar-chart-line",
-        "func": st_pages.analytics_dashboard,
+        "func": st_pages.media,
         "description": "View AI Conversation Analytics",
         "badge": "Insights",
         "color": "var(--tertiary-color)"
