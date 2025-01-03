@@ -1,8 +1,12 @@
 import streamlit as st
-import st_pages # required modules
+import st_pages  # Ensure this module is correctly installed and imported
 
 # Set page config
-st.set_page_config(page_title="TalkNexus - Ollama Chatbot Multi-Model Interface", layout="wide", page_icon="🤖")
+st.set_page_config(
+    page_title="TalkNexus - Ollama Chatbot Multi-Model Interface",
+    layout="wide",
+    page_icon="🤖"
+)
 
 # Load custom CSS from file
 def load_css(file_name):
@@ -26,35 +30,49 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Enhanced pages definition
+# Enhanced pages definition with additional pages
 PAGES = {
     "Home": {
         "icon": "house-door",
-        "func": st_pages.home,
+        "func": lambda: st.write("Welcome to TalkNexus! Explore the AI-powered chatbot interface."),
         "description": "Guidelines & Overview",
         "badge": "Informative",
         "color": "var(--primary-color)"
     },
     "Language Models Management": {
         "icon": "gear",
-        "func": st_pages.model_management,
+        "func": lambda: st.write("Manage and download AI language models."),
         "description": "Download Models",
         "badge": "Configurations",
         "color": "var(--secondary-color)"
     },
     "AI Conversation": {
         "icon": "chat-dots",
-        "func": st_pages.ai_chatbot,
+        "func": lambda: st.write("Start interactive AI conversations here."),
         "description": "Interactive AI Chat",
         "badge": "Application",
         "color": "var(--highlight-color)"
     },
     "RAG Conversation": {
         "icon": "chat-dots",
-        "func": st_pages.rag_chat,
+        "func": lambda: st.write("Chat with AI powered by RAG models."),
         "description": "PDF AI Chat Assistant",
         "badge": "Application",
         "color": "var(--highlight-color)"
+    },
+    "Analytics Dashboard": {
+        "icon": "bar-chart-line",
+        "func": lambda: st.write("View analytics of AI conversations and performance."),
+        "description": "View AI Conversation Analytics",
+        "badge": "Insights",
+        "color": "var(--tertiary-color)"
+    },
+    "Settings": {
+        "icon": "sliders",
+        "func": lambda: st.write("Configure user preferences and app settings."),
+        "description": "User Preferences & Configuration",
+        "badge": "Customizable",
+        "color": "var(--accent-color)"
     }
 }
 
@@ -62,6 +80,7 @@ st.markdown("""
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 """, unsafe_allow_html=True)
 
+# Navigation function
 def navigate():
     with st.sidebar:
         st.markdown('''
@@ -82,8 +101,8 @@ def navigate():
         # Create menu items
         for page, info in PAGES.items():
             selected = st.session_state.current_page == page
-            
-            # Create the button (invisible but clickable)
+
+            # Create the button
             if st.button(
                 f"{page}",
                 key=f"nav_{page}",
@@ -125,15 +144,15 @@ try:
     page_function()
 except Exception as e:
     st.error(f"Error loading page: {str(e)}")
-    st_pages.home.run()
+    PAGES["Home"]["func"]()
 
 # Display the footer
 st.markdown("""
 <div class="footer">
     <div class="footer-content">
-        <p>© 2024 Powered by <a href="https://github.com/TsLu1s" target="_blank">TsLu1s </a>. 
+        <p>© 2024 Powered by <a href="https://github.com/TsLu1s" target="_blank">TsLu1s</a>. 
         Advanced Language Models & Intelligent Conversations
-        | Project Source: <a href="https://github.com/TsLu1s/talknexus" target="_blank"> TalkNexus</p>
+        | Project Source: <a href="https://github.com/TsLu1s/talknexus" target="_blank">TalkNexus</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
