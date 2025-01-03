@@ -49,9 +49,16 @@ PAGES = {
         "badge": "Application",
         "color": "var(--highlight-color)"
     },
+    "AI Conversation": {
+        "icon": "chat-dots",
+        "func": st_pages.media,
+        "description": "Interactive AI Chat",
+        "badge": "Application",
+        "color": "var(--highlight-color)"
+    },
     "RAG Conversation": {
         "icon": "chat-dots",
-        "func": st_pages.rag_chat,
+        "func": st_pages.credit,
         "description": "PDF AI Chat Assistant",
         "badge": "Application",
         "color": "var(--highlight-color)"
