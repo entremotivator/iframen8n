@@ -30,31 +30,52 @@ st.markdown(f"""
 PAGES = {
     "Home": {
         "icon": "house-door",
-        "func": st_pages.home,
+        "func": st_pages.home.run,
         "description": "Guidelines & Overview",
         "badge": "Informative",
         "color": "var(--primary-color)"
     },
     "Language Models Management": {
         "icon": "gear",
-        "func": st_pages.model_management,
+        "func": st_pages.model_management.run,
         "description": "Download Models",
         "badge": "Configurations",
         "color": "var(--secondary-color)"
     },
     "AI Conversation": {
         "icon": "chat-dots",
-        "func": st_pages.ai_chatbot,
+        "func": st_pages.ai_chatbot.run,
         "description": "Interactive AI Chat",
         "badge": "Application",
         "color": "var(--highlight-color)"
     },
     "RAG Conversation": {
         "icon": "chat-dots",
-        "func": st_pages.rag_chat,
+        "func": st_pages.rag_chat.run,
         "description": "PDF AI Chat Assistant",
         "badge": "Application",
         "color": "var(--highlight-color)"
+    },
+    "Media": {
+        "icon": "images",
+        "func": st_pages.media.run,
+        "description": "Manage media assets",
+        "badge": "Tools",
+        "color": "var(--tertiary-color)"
+    },
+    "Credit": {
+        "icon": "credit-card",
+        "func": st_pages.credit.run,
+        "description": "Handle credit information",
+        "badge": "Finance",
+        "color": "var(--success-color)"
+    },
+    "Contract": {
+        "icon": "file-text",
+        "func": st_pages.contract.run,
+        "description": "Manage contracts",
+        "badge": "Documents",
+        "color": "var(--warning-color)"
     }
 }
 
