@@ -1,6 +1,5 @@
-# Import required modules
 import streamlit as st
-import st_pages  # Ensure this has the required functions implemented
+import st_pages # required modules
 
 # Set page config
 st.set_page_config(page_title="TalkNexus - Ollama Chatbot Multi-Model Interface", layout="wide", page_icon="🤖")
@@ -56,20 +55,6 @@ PAGES = {
         "description": "PDF AI Chat Assistant",
         "badge": "Application",
         "color": "var(--highlight-color)"
-    },
-    "Media": {
-        "icon": "image",
-        "func": st_pages.media,
-        "description": "Manage Media",
-        "badge": "Media Tools",
-        "color": "var(--tertiary-color)"
-    },
-    "Credit": {
-        "icon": "credit-card",
-        "func": st_pages.credit,
-        "description": "Credit Management",
-        "badge": "Finance Tools",
-        "color": "var(--highlight-color)"
     }
 }
 
@@ -122,6 +107,7 @@ def navigate():
                 </div>
             """, unsafe_allow_html=True)
 
+        # Close navigation container
         st.markdown('</div>', unsafe_allow_html=True)
         
         return st.session_state.current_page
@@ -129,6 +115,7 @@ def navigate():
 # Get selected page and run its function
 try:
     selected_page = navigate()
+    # Update session state
     if selected_page != st.session_state.current_page:
         st.session_state.current_page = selected_page
         st.rerun()
@@ -150,4 +137,3 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
