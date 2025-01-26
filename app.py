@@ -1,5 +1,6 @@
 import streamlit as st
-import st_pages # required modules
+import st_pages  # required modules
+
 
 # Set page config
 st.set_page_config(page_title="TalkNexus - Ollama Chatbot Multi-Model Interface", layout="wide", page_icon="🤖")
@@ -35,25 +36,116 @@ PAGES = {
         "badge": "Informative",
         "color": "var(--primary-color)"
     },
-    "Language Models Management": {
-        "icon": "gear",
-        "func": st_pages.model_management,
-        "description": "Download Models",
-        "badge": "Configurations",
-        "color": "var(--secondary-color)"
-    },
-    "AI Conversation": {
+    "Agent Chat": {
         "icon": "chat-dots",
-        "func": st_pages.ai_chatbot,
-        "description": "Interactive AI Chat",
+        "func": "pages.💭Agent Chat",
+        "description": "Chat with AI Agents",
         "badge": "Application",
         "color": "var(--highlight-color)"
     },
-    "RAG Conversation": {
-        "icon": "chat-dots",
-        "func": st_pages.rag_chat,
-        "description": "PDF AI Chat Assistant",
+    "Dashboard": {
+        "icon": "bar-chart",
+        "func": "pages.1_📊Dashboard",
+        "description": "Interactive Data Overview",
+        "badge": "Analytics",
+        "color": "var(--secondary-color)"
+    },
+    "Agent Projects": {
+        "icon": "folder",
+        "func": "pages.2_ 📁_Agent Projects",
+        "description": "Manage Agent Projects",
+        "badge": "Management",
+        "color": "var(--primary-color)"
+    },
+    "Internet Agent": {
+        "icon": "search",
+        "func": "pages.2_🔍_Internet Agent",
+        "description": "Web-Savvy AI Agents",
+        "badge": "Exploration",
+        "color": "var(--highlight-color)"
+    },
+    "AI Agent Roster": {
+        "icon": "person-workspace",
+        "func": "pages.2_🧑‍💻_AI Agent Roster",
+        "description": "AI Agent Directory",
+        "badge": "Information",
+        "color": "var(--secondary-color)"
+    },
+    "Agent Headquarters": {
+        "icon": "building",
+        "func": "pages.3_ 🏢_Agent HeadQuaters",
+        "description": "AI Base of Operations",
+        "badge": "HQ",
+        "color": "var(--primary-color)"
+    },
+    "Agent Generator": {
+        "icon": "gear",
+        "func": "pages.3_⚙️_Agent Generator",
+        "description": "Create Custom Agents",
+        "badge": "Tool",
+        "color": "var(--highlight-color)"
+    },
+    "LLM Agents": {
+        "icon": "robot",
+        "func": "pages.3_🛋_LLM Agents",
+        "description": "Large Language Models",
         "badge": "Application",
+        "color": "var(--secondary-color)"
+    },
+    "LLM Library": {
+        "icon": "book",
+        "func": "pages.3_📚LLM Libary",
+        "description": "Central Model Repository",
+        "badge": "Library",
+        "color": "var(--primary-color)"
+    },
+    "Agent Command": {
+        "icon": "command",
+        "func": "pages.3_🧠Agent Command",
+        "description": "Control AI Agents",
+        "badge": "Command",
+        "color": "var(--highlight-color)"
+    },
+    "Agent Tool Library": {
+        "icon": "tool",
+        "func": "pages.3_🧠Agent Tool Libary",
+        "description": "Comprehensive Toolset",
+        "badge": "Tools",
+        "color": "var(--secondary-color)"
+    },
+    "Forms": {
+        "icon": "pencil",
+        "func": "pages.✍️ Forms",
+        "description": "Manage Data Collection",
+        "badge": "Forms",
+        "color": "var(--primary-color)"
+    },
+    "Visual Agent Flow": {
+        "icon": "circle-fill",
+        "func": "pages.🔀 Visual Agent Flow",
+        "description": "Visualize AI Workflows",
+        "badge": "Visualization",
+        "color": "var(--highlight-color)"
+    },
+    "Content Agents": {
+        "icon": "file-earmark-text",
+        "func": "pages.📁 Content Agents",
+        "description": "AI Content Generation",
+        "badge": "Content",
+        "color": "var(--secondary-color)"
+    },
+    "Active Agents": {
+        "icon": "battery-charging",
+        "func": "pages.🔋 Active Agents",
+        "description": "Monitor Agent Activity",
+        "badge": "Activity",
+        "color": "var(--primary-color)"
+    },
+    "Format Agents": {
+        "icon": "file-code",
+        "func": "pages.🤖 Format Agents",
+        "description": "Formatting Assistance",
+        "badge": "Tools",
         "color": "var(--highlight-color)"
     }
 }
@@ -82,7 +174,7 @@ def navigate():
         # Create menu items
         for page, info in PAGES.items():
             selected = st.session_state.current_page == page
-            
+
             # Create the button (invisible but clickable)
             if st.button(
                 f"{page}",
@@ -109,7 +201,7 @@ def navigate():
 
         # Close navigation container
         st.markdown('</div>', unsafe_allow_html=True)
-        
+
         return st.session_state.current_page
 
 # Get selected page and run its function
@@ -119,7 +211,7 @@ try:
     if selected_page != st.session_state.current_page:
         st.session_state.current_page = selected_page
         st.rerun()
-    
+
     # Run the selected function
     page_function = PAGES[selected_page]["func"]
     page_function()
@@ -131,9 +223,9 @@ except Exception as e:
 st.markdown("""
 <div class="footer">
     <div class="footer-content">
-        <p>© 2024 Powered by <a href="https://github.com/TsLu1s" target="_blank">TsLu1s </a>. 
+        <p>© 2024 Powered by <a href="https://github.com/TsLu1s" target="_blank">TsLu1s</a>. 
         Advanced Language Models & Intelligent Conversations
-        | Project Source: <a href="https://github.com/TsLu1s/talknexus" target="_blank"> TalkNexus</p>
+        | Project Source: <a href="https://github.com/TsLu1s/talknexus" target="_blank"> TalkNexus</a></p>
     </div>
 </div>
 """, unsafe_allow_html=True)
