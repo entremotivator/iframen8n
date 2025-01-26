@@ -161,8 +161,8 @@ def navigate():
             <div class="header-container" style="cursor: pointer;">
                 <div class="profile-section">
                     <div class="profile-info">
-                        <h1 style="font-size: 32px;">TalkNexus</h1>
-                        <span class="active-badge" style="font-size: 16px;">AI Agent MS Application</span>
+                        <h1 style="font-size: 32px;">AIAGENTMS</h1>
+                        <span class="active-badge" style="font-size: 16px;">AI Agent Management System</span>
                     </div>
                 </div>
             </div>
