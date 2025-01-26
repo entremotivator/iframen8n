@@ -3,7 +3,7 @@ import st_pages  # required modules
 
 
 # Set page config
-st.set_page_config(page_title="AI Agent ManageMent System - Agent Multi-Model Interface", layout="wide", page_icon="🤖")
+st.set_page_config(page_title="AI Agent ManageMent System - Agent Multi-Agent Interface", layout="wide", page_icon="🤖")
 
 # Load custom CSS from file
 def load_css(file_name):
@@ -21,7 +21,7 @@ st.markdown(f"""
 <div class="header">
     <div class="animated-bg"></div>
     <div class="header-content">
-        <h1 class="header-title">AI AGENT MS Interface</h1> 
+        <h1 class="header-title">AI AGENT Management System</h1> 
         <p class="header-subtitle">Advanced Agent & Tracking System</p>
     </div>
 </div>
