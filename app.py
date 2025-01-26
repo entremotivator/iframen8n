@@ -3,7 +3,7 @@ import st_pages  # required modules
 
 
 # Set page config
-st.set_page_config(page_title="TalkNexus - Ollama Chatbot Multi-Model Interface", layout="wide", page_icon="🤖")
+st.set_page_config(page_title="AI Agent ManageMent System - Agent Multi-Model Interface", layout="wide", page_icon="🤖")
 
 # Load custom CSS from file
 def load_css(file_name):
@@ -21,8 +21,8 @@ st.markdown(f"""
 <div class="header">
     <div class="animated-bg"></div>
     <div class="header-content">
-        <h1 class="header-title">Ollama Chatbot Multi-Model Interface</h1> 
-        <p class="header-subtitle">Advanced Language Models & Intelligent Conversations</p>
+        <h1 class="header-title">AI AGENT MS Interface</h1> 
+        <p class="header-subtitle">Advanced Agent & Tracking System</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -157,12 +157,12 @@ st.markdown("""
 def navigate():
     with st.sidebar:
         st.markdown('''
-        <a href="https://github.com/TsLu1s/talknexus" target="_blank" style="text-decoration: none; color: inherit; display: block;">
+        <a href="https://github.com/Entremotivator" target="_blank" style="text-decoration: none; color: inherit; display: block;">
             <div class="header-container" style="cursor: pointer;">
                 <div class="profile-section">
                     <div class="profile-info">
                         <h1 style="font-size: 32px;">TalkNexus</h1>
-                        <span class="active-badge" style="font-size: 16px;">AI Chatbot Multi-Model Application</span>
+                        <span class="active-badge" style="font-size: 16px;">AI Agent MS Application</span>
                     </div>
                 </div>
             </div>
@@ -223,9 +223,9 @@ except Exception as e:
 st.markdown("""
 <div class="footer">
     <div class="footer-content">
-        <p>© 2024 Powered by <a href="https://github.com/TsLu1s" target="_blank">TsLu1s</a>. 
-        Advanced Language Models & Intelligent Conversations
-        | Project Source: <a href="https://github.com/TsLu1s/talknexus" target="_blank"> TalkNexus</a></p>
+        <p>© 2024 Powered by <a href="https://github.com/Entremotivator" target="_blank">TsLu1s</a>. 
+        Advanced AGENT TRACKING SYSTEM
+        | Project Source: <a href="https://github.com/TsLu1s/talknexus" target="_blank"> AI AGENT MS</a></p>
     </div>
 </div>
 """, unsafe_allow_html=True)
